@@ -79,7 +79,6 @@ WSGI_APPLICATION = 'chocolate_bakery_proj.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 if DEBUG:
-    print(BASE_DIR.parent)
     database_confs = BASE_DIR / 'db_dev.conf'
 else:
     database_confs = BASE_DIR / 'db_prod.conf'

@@ -12,7 +12,9 @@ class Category(models.Model):
         verbose_name='Название категории',
         db_index=True
     )
-    slug = models.SlugField(max_length=50, unique=True)
+    slug = models.SlugField(
+        max_length=50, unique=True, verbose_name='Слаг'
+    )
 
     def __str__(self):
         return self.name
@@ -29,18 +31,27 @@ class Category(models.Model):
 
 class ProductTypes(models.Model):
     title = models.CharField(max_length=50, verbose_name='Тип товара')
-
-    def __str__(self):
-        return self.title
+    slug = models.SlugField(
+        max_length=50, unique=True, verbose_name='Слаг'
+    )
 
     class Meta:
         verbose_name = 'Тип товара'
         verbose_name_plural = 'Типы товаров'
 
+    def __str__(self):
+        return self.title
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        return super().save(*args, **kwargs)
+
 
 class Products(models.Model):
     title = models.CharField(
-        max_length=150, verbose_name='Название товара', db_index=True
+        max_length=150, verbose_name='Название товара', db_index=True,
+        blank=False, null=False
     )
     category = models.ForeignKey(
         Category, on_delete=models.PROTECT
@@ -49,9 +60,14 @@ class Products(models.Model):
         ProductTypes, related_name='product_type',
         verbose_name='Тип товара'
     )
-    image = models.ImageField(verbose_name='Изоображениe товара')
+    image = models.ImageField(
+        verbose_name='Изоображениe товара', blank=False, null=False
+    )
     description = models.TextField(verbose_name='Описание товара')
     composition = models.TextField(verbose_name='Cостав')
+    price = models.PositiveIntegerField(
+        verbose_name='Cтоимость товара в коп.'
+    )
 
     def __str__(self):
         return f'{self.title} - {self.category}'
