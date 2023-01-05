@@ -16,6 +16,7 @@ slugify = "^0.0.1"
 django-debug-toolbar = "^3.8.1"
 coverage = "^7.0.2"
 cryptography = "^39.0.0"
+mock = "^5.0.0"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -61,7 +61,7 @@ class Products(models.Model):
         verbose_name='Тип товара'
     )
     image = models.ImageField(
-        verbose_name='Изоображениe товара', blank=False, null=False
+        verbose_name='Изоображениe товара'
     )
     description = models.TextField(verbose_name='Описание товара')
     composition = models.TextField(verbose_name='Cостав')

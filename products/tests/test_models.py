@@ -1,5 +1,7 @@
 import unittest
+import tempfile
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.utils import DataError
 
 from products.models import Category, ProductTypes, Products
@@ -74,6 +76,75 @@ class ProductTypesTestCase(unittest.TestCase):
 
     def tearDown(self):
         self.product_type.delete()
+
+
+class ProductsTestCase(unittest.TestCase):
+
+    def setUp(self) -> None:
+
+        image_jpg = SimpleUploadedFile(
+            name='test_image.jpg',
+            content=open('products/tests/test_image.jpg', 'rb').read(),
+            content_type='image/jpeg'
+        )
+        self.image_jpeg = tempfile.TemporaryFile(suffix='.jpeg')
+        self.image_jpg = tempfile.TemporaryFile(suffix='.jpg')
+        self.image_gif = tempfile.TemporaryFile(suffix='.gif')
+        self.category = Category.objects.create(
+            name='Some category', slug='somecategory'
+        )
+        self.product_type = ProductTypes.objects.create(
+            title='Product type title', slug='productslugtype'
+        )
+        self.product_1 = Products.objects.create(
+            title='Product title', category=self.category,
+            description='some desc', composition='Some composition',
+            price=100
+        )
+        self.product_1.product_type.add(self.product_type)
+
+        self.impossible_title = ''.join([str(y) for y in range(155)])
+
+    def test_product_title_is_predictable(self):
+        self.assertEquals(self.product_1.title, 'Product title')
+
+    def test_product_category_is_predictable(self):
+        self.assertEquals(self.product_1.category, self.category)
+
+    def test_product_type_is_predictable(self):
+        self.assertEquals(
+            self.product_1.product_type.first().title, self.product_type.title
+        )
+
+    def test_product_desc_is_predictable(self):
+        self.assertEquals(self.product_1.description, 'some desc')
+
+    def test_product_comp_is_predictable(self):
+        self.assertEquals(self.product_1.composition, 'Some composition')
+    #
+    # def test_possibility_to_change_product_type_name(self):
+    #     self.product_1.title = 'New product type title'
+    #     self.assertEquals(self.product_1.title, 'New product type title')
+    #
+    # def test_possibility_to_change_product_type_name_to_cyrriltic(self):
+    #     self.product_type.title = 'Что-то'
+    #     self.assertEquals(self.product_type.title, 'Что-то')
+    #
+    # def test_impossible_to_create_with_impossible_product_type_name(self):
+    #     try:
+    #         ProductTypes.objects.create(
+    #             title=self.impossible_name2
+    #         )
+    #         is_it_possible = True
+    #     except DataError:
+    #         is_it_possible = False
+    #     self.assertEqual(is_it_possible, False)
+
+    def tearDown(self):
+        self.product_1.delete()
+        self.category.delete()
+        self.product_type.delete()
+
 
 
 if __name__ == '__main__':
