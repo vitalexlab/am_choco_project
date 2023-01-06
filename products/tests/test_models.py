@@ -13,7 +13,6 @@ class CategoryTestCase(unittest.TestCase):
         self.category_1 = Category.objects.create(
             name='Category 22',
         )
-        print(self.category_1.slug)
         self.impossible_name1 = '123456789012345678901234567890123456789012345678901'
 
     def test_category_title_is_predictable(self):
@@ -87,9 +86,6 @@ class ProductsTestCase(unittest.TestCase):
             content=open('products/tests/test_image.jpg', 'rb').read(),
             content_type='image/jpeg'
         )
-        self.image_jpeg = tempfile.TemporaryFile(suffix='.jpeg')
-        self.image_jpg = tempfile.TemporaryFile(suffix='.jpg')
-        self.image_gif = tempfile.TemporaryFile(suffix='.gif')
         self.category = Category.objects.create(
             name='Some category', slug='somecategory'
         )
@@ -121,30 +117,29 @@ class ProductsTestCase(unittest.TestCase):
 
     def test_product_comp_is_predictable(self):
         self.assertEquals(self.product_1.composition, 'Some composition')
-    #
-    # def test_possibility_to_change_product_type_name(self):
-    #     self.product_1.title = 'New product type title'
-    #     self.assertEquals(self.product_1.title, 'New product type title')
-    #
-    # def test_possibility_to_change_product_type_name_to_cyrriltic(self):
-    #     self.product_type.title = 'Что-то'
-    #     self.assertEquals(self.product_type.title, 'Что-то')
-    #
-    # def test_impossible_to_create_with_impossible_product_type_name(self):
-    #     try:
-    #         ProductTypes.objects.create(
-    #             title=self.impossible_name2
-    #         )
-    #         is_it_possible = True
-    #     except DataError:
-    #         is_it_possible = False
-    #     self.assertEqual(is_it_possible, False)
+
+    def test_possibility_to_change_product_name(self):
+        self.product_1.title = 'New product type title'
+        self.assertEquals(self.product_1.title, 'New product type title')
+
+    def test_possibility_to_change_product__name_to_cyrriltic(self):
+        self.product_type.title = 'Что-то'
+        self.assertEquals(self.product_type.title, 'Что-то')
+
+    def test_impossible_to_create_with_impossible_product_name(self):
+        try:
+            ProductTypes.objects.create(
+                title=self.impossible_title
+            )
+            is_it_possible = True
+        except DataError:
+            is_it_possible = False
+        self.assertEqual(is_it_possible, False)
 
     def tearDown(self):
         self.product_1.delete()
         self.category.delete()
         self.product_type.delete()
-
 
 
 if __name__ == '__main__':
