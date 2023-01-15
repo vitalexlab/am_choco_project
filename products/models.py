@@ -15,6 +15,7 @@ class Category(models.Model):
     slug = models.SlugField(
         max_length=50, unique=True, verbose_name='Слаг'
     )
+    image = models.ImageField(verbose_name='Изоображениe категории')
 
     def __str__(self):
         return self.name
