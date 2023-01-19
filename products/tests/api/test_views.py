@@ -1,8 +1,11 @@
+import string
+
+import django.db.utils
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from products.models import Category
+from products.models import Category, ProductTypes
 
 
 class CategoryTest(APITestCase):
@@ -44,3 +47,44 @@ class CategoryTest(APITestCase):
         response = self.get_response_category()
         slug1_from_view = response.data[1].get('slug')
         self.assertNotEqual(slug1_from_db, slug1_from_view)
+
+
+class ProductTypesTests(APITestCase):
+    def setUp(self) -> None:
+        pt1 = ProductTypes.objects.create(
+            title='Name1', slug='Slug1'
+        )
+        pt2 = ProductTypes.objects.create(
+            title='Name2'
+        )
+        self.name = 'types'
+
+    def get_response(self):
+        url = reverse(self.name)
+        response = self.client.get(url)
+        return response
+
+    def test_get_product_types_list(self):
+        response = self.get_response()
+        self.assertEqual(len(response.data), 2)
+
+    def test_count_product_types(self):
+        count = ProductTypes.objects.count()
+        response_data = self.get_response().data
+        self.assertEqual(count, len(response_data))
+
+    def test_product_type_title(self):
+        new_product_type = ProductTypes.objects.create(title='New')
+        product_from_response = self.get_response().data
+        self.assertEqual(product_from_response[0].get('title'), 'Name1')
+        self.assertEqual(product_from_response[1].get('title'), 'Name2')
+        self.assertEqual(product_from_response[2].get('title'), new_product_type.title)
+
+    def test_product_type_slug_from_db(self):
+        product_type_1 = ProductTypes.objects.get(title='Name1')
+        self.assertEqual(product_type_1.slug, 'Slug1')
+
+    def test_product_type_slug_not_in_view(self):
+        response = self.get_response().data
+        for item in response:
+            self.assertEqual(item.get('slug'), None)

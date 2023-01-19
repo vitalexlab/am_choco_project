@@ -1,9 +1,9 @@
 from django.shortcuts import render
 from rest_framework import views, response
 
-from products.models import Products, Category
+from products.models import Products, Category, ProductTypes
 
-from .serializers import ProductsSerializer, CategorySerializer
+from .serializers import (CategorySerializer, ProductTypesSerializer)
 
 
 class CategoryAPIView(views.APIView):
@@ -11,14 +11,14 @@ class CategoryAPIView(views.APIView):
 
     def get(self, request):
         queryset = Category.objects.all()
-        serilalizer = CategorySerializer(queryset, many=True)
-        return response.Response(serilalizer.data)
+        serializer = CategorySerializer(queryset, many=True)
+        return response.Response(serializer.data)
 
 
-class ProductsAPIView(views.APIView):
+class ProductTypesAPIView(views.APIView):
+    """To show all product types"""
 
-    """List all products"""
-    def get(self, request, format=None):
-        queryset = Products.objects.all()
-        serializer = ProductsSerializer(queryset, many=True)
+    def get(self, request):
+        queryset = ProductTypes.objects.all()
+        serializer = ProductTypesSerializer(queryset, many=True)
         return response.Response(serializer.data)
