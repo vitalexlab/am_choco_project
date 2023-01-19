@@ -101,7 +101,14 @@ class ProductsTestCase(unittest.TestCase):
 
         self.impossible_title = ''.join([str(y) for y in range(155)])
 
-
+    def test_attributes(self):
+        attribute_dict: dict = self.product_1.__dict__
+        current_attribute_names = (
+            '_state', 'id', 'title', 'category_id', 'image',
+            'description', 'composition', 'price'
+        )
+        for attr in attribute_dict.keys():
+            self.assertIn(attr, current_attribute_names)
 
     def test_length_product_title(self):
         self.assertLess(len(self.product_1.title), 150)

@@ -127,8 +127,66 @@ class ProductTests(APITestCase):
         self.product_3 = Products.objects.create(
             title=self.title2, category=self.category_obj2, price=self.price2
         )
+        self.response = self.get_response_data()
 
-    def get_response(self):
+    def get_response_data(self):
         url = reverse('products')
         response = self.client.get(url)
-        return response
+        return response.data
+
+    def test_product_title_equals_db_ones(self):
+        self.assertEqual(self.response[0].get('title'), self.product_1.title)
+        self.assertEqual(self.response[1].get('title'), self.product_2.title)
+        self.assertEqual(self.response[2].get('title'), self.product_3.title)
+
+    def test_product_types_of_product(self):
+        self.assertEqual(
+            self.response[0].get('product_type')[0].get('title'),
+            self.pr_title1
+        )
+        self.assertEqual(
+            self.response[1].get('product_type')[0].get('title'),
+            self.pr_title2
+        )
+        self.assertTrue(
+            self.response[2].get('product_type') == []
+        )
+
+    def test_product_types_serialized_data_count(self):
+        self.assertEqual(len(self.response[0].get('product_type')[0]), 2)
+        self.assertEqual(len(self.response[1].get('product_type')[0]), 2)
+        self.assertEqual(self.response[2].get('product_type'), [])
+        # self.assertRaises(IndexError, self.response[2].get('product_type')[0])
+
+    def test_category_of_products(self):
+        self.assertEqual(
+            self.product_1.category,
+            self.category_obj1
+        )
+        self.assertEqual(
+            self.product_2.category,
+            self.category_obj2
+        )
+        self.assertEqual(
+            self.product_3.category,
+            self.category_obj2
+        )
+        product_4 = Products.objects.create(
+            title='title', category=self.category_obj1, price=1
+        )
+        new_resp = self.get_response_data()
+        self.assertEqual(
+            product_4.category.id, new_resp[3].get('category'),
+        )
+
+    def test_descriptions_products(self):
+        for item in self.response:
+            self.assertTrue(isinstance(item.get('description'), str))
+
+    def test_product_composition(self):
+        for item in self.response:
+            self.assertTrue(isinstance(item.get('description'), str))
+
+    def test_product_price(self):
+        for item in self.response:
+            self.assertTrue(item.get('price'), int)
