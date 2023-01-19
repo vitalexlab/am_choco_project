@@ -3,7 +3,9 @@ from rest_framework import views, response
 
 from products.models import Products, Category, ProductTypes
 
-from .serializers import (CategorySerializer, ProductTypesSerializer)
+from .serializers import (
+    CategorySerializer, ProductTypesSerializer, ProductSerializer
+)
 
 
 class CategoryAPIView(views.APIView):
@@ -21,4 +23,13 @@ class ProductTypesAPIView(views.APIView):
     def get(self, request):
         queryset = ProductTypes.objects.all()
         serializer = ProductTypesSerializer(queryset, many=True)
+        return response.Response(serializer.data)
+
+
+class ProductsAPIView(views.APIView):
+    """Shows all the products from db"""
+
+    def get(self, request):
+        queryset = Products.objects.all()
+        serializer = ProductSerializer(queryset, many=True)
         return response.Response(serializer.data)

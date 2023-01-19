@@ -101,6 +101,13 @@ class ProductsTestCase(unittest.TestCase):
 
         self.impossible_title = ''.join([str(y) for y in range(155)])
 
+
+
+    def test_length_product_title(self):
+        self.assertLess(len(self.product_1.title), 150)
+        self.product_1.title = 's' * 151
+        self.assertRaises(DataError, self.product_1.save)
+
     def test_product_title_is_predictable(self):
         self.assertEquals(self.product_1.title, 'Product title')
 

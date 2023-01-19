@@ -1,11 +1,9 @@
-import string
-
-import django.db.utils
+from django.db.utils import DataError
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from products.models import Category, ProductTypes
+from products.models import Category, ProductTypes, Products
 
 
 class CategoryTest(APITestCase):
@@ -88,3 +86,49 @@ class ProductTypesTests(APITestCase):
         response = self.get_response().data
         for item in response:
             self.assertEqual(item.get('slug'), None)
+
+
+class ProductTests(APITestCase):
+
+    def setUp(self) -> None:
+        self.category_name1 = 'Cat1'
+        self.category_name2 = 'Cat2'
+        self.category_obj1 = Category.objects.create(name=self.category_name1)
+        self.category_obj2 = Category.objects.create(name=self.category_name2)
+
+        self.pr_title1 = 'pt_title1'
+        self.pr_title2 = 'pt_title2'
+        pr_type1 = ProductTypes.objects.create(title=self.pr_title1)
+        pr_type2 = ProductTypes.objects.create(title=self.pr_title2)
+
+        self.title1 = 'Title1'
+        self.title2 = 'Title2'
+
+        self.desc1 = 'desc1'
+        self.desc2 = 'desc2'
+
+        self.compos1 = 'comp1'
+        self.compos2 = 'comp2'
+
+        self.price1 = 500
+        self.price2 = 1000
+
+        self.product_1 = Products.objects.create(
+            title=self.title1, category=self.category_obj1, description=self.desc1,
+            composition=self.compos1, price=self.price1
+        )
+        self.product_1.product_type.add(pr_type1)
+
+        self.product_2 = Products.objects.create(
+            title=self.title2, category=self.category_obj2, description=self.desc2,
+            composition=self.compos2, price=self.price2
+        )
+        self.product_2.product_type.add(pr_type2)
+        self.product_3 = Products.objects.create(
+            title=self.title2, category=self.category_obj2, price=self.price2
+        )
+
+    def get_response(self):
+        url = reverse('products')
+        response = self.client.get(url)
+        return response
