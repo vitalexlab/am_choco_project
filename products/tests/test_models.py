@@ -1,7 +1,4 @@
 import unittest
-import tempfile
-
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.utils import DataError
 
 from products.models import Category, ProductTypes, Products
@@ -81,11 +78,6 @@ class ProductsTestCase(unittest.TestCase):
 
     def setUp(self) -> None:
 
-        # image_jpg = SimpleUploadedFile(
-        #     name='test_image.jpg',
-        #     content=open('products/tests/test_image.jpg', 'rb').read(),
-        #     content_type='image/jpeg'
-        # )
         self.category = Category.objects.create(
             name='Some category', slug='somecategory'
         )
