@@ -1,7 +1,9 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 from products.models import Products
+from store.utils import ValidatePhone
 
 
 class Order(models.Model):
@@ -14,6 +16,16 @@ class Order(models.Model):
         max_length=13, verbose_name='Телефон покупателя'
     )
     date_time_ordered = models.DateTimeField(auto_now_add=True)
+
+    def clean(self):
+
+        phone = ValidatePhone(str(self.consumer_phone))
+        if not phone.validate():
+            raise ValidationError({'consumer_phone': self.consumer_phone})
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super(Order, self).save(*args,**kwargs)
 
     def __str__(self):
         return f'Заказ №{self.id}/ Покупатель {self.consumer_phone}'
