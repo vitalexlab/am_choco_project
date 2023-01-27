@@ -1,5 +1,4 @@
-from django.shortcuts import render
-from rest_framework import views, response
+from rest_framework import views, response, status
 
 from products.models import Products, Category, ProductTypes
 
@@ -13,8 +12,11 @@ class CategoryAPIView(views.APIView):
 
     def get(self, request):
         queryset = Category.objects.all()
-        serializer = CategorySerializer(queryset, many=True)
-        return response.Response(serializer.data)
+        if queryset:
+            serializer = CategorySerializer(queryset, many=True)
+            return response.Response(serializer.data)
+        else:
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class ProductTypesAPIView(views.APIView):
@@ -22,8 +24,11 @@ class ProductTypesAPIView(views.APIView):
 
     def get(self, request):
         queryset = ProductTypes.objects.all()
-        serializer = ProductTypesSerializer(queryset, many=True)
-        return response.Response(serializer.data)
+        if queryset:
+            serializer = ProductTypesSerializer(queryset, many=True)
+            return response.Response(serializer.data)
+        else:
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class ProductsAPIView(views.APIView):
@@ -31,5 +36,8 @@ class ProductsAPIView(views.APIView):
 
     def get(self, request):
         queryset = Products.objects.all()
-        serializer = ProductSerializer(queryset, many=True)
-        return response.Response(serializer.data)
+        if queryset:
+            serializer = ProductSerializer(queryset, many=True)
+            return response.Response(serializer.data)
+        else:
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
