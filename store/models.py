@@ -38,11 +38,11 @@ class OrderItem(models.Model):
         verbose_name_plural = 'Заказываемые товары'
 
     product = models.ForeignKey(
-        Products, on_delete=models.SET_NULL, blank=True, null=True,
+        Products, on_delete=models.PROTECT,
         verbose_name='Товар',
     )
     order = models.ForeignKey(
-        Order, on_delete=models.SET_NULL, blank=True, null=True,
+        Order, on_delete=models.PROTECT, blank=True, null=True,
         verbose_name='Детали заказа'
     )
     quantity = models.IntegerField(default=0, null=True, blank=True,
@@ -55,7 +55,10 @@ class OrderItem(models.Model):
 
     @property
     def get_cost(self):
-        cost = self.product.price * self.quantity * (100 - self.sale) / 100
+        if self.product:
+            cost = self.product.price * self.quantity * (100 - self.sale) / 100
+        else:
+            cost = 0
         return cost
 
     def __str__(self):
@@ -80,12 +83,19 @@ class Cart(models.Model):
             MaxValueValidator(100), MinValueValidator(0)
         ]
     )
-    total_cost = models.PositiveIntegerField(
-        default=0, verbose_name='Стоимость корзины, коп.', validators=[
-            MinValueValidator(1)
-        ]
+    is_completed = models.BooleanField(
+        verbose_name='Выполнен',
+        default=False, null=False, blank=False
     )
-    is_completed = models.BooleanField(default=False, null=False, blank=False)
+
+    @property
+    def total_cost(self):
+        total_cost = sum(
+            [order_item.get_cost for order_item in self.order_item.all()]
+        )
+        return total_cost
+
+    total_cost.fget.short_description = 'Сумма корзины, коп.'
 
     def __str__(self):
-        return f'{self.order}/{self.order_item} ({self.total_cost} коп.)'
+        return f'{self.order}/ на сумму ({self.total_cost // 100} руб. {int(self.total_cost % 100)} коп.)'
