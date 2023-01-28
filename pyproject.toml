@@ -17,6 +17,7 @@ django-debug-toolbar = "^3.8.1"
 coverage = "^7.0.2"
 cryptography = "^39.0.0"
 mock = "^5.0.0"
+drf-yasg = "^1.21.4"
 
 
 [tool.poetry.group.dev.dependencies]
