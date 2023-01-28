@@ -1,7 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 
 from store.models import Cart, OrderItem
-from products.models import Products, ProductTypes
+from products.models import Products
 
 
 class OrderItemProductSerializer(ModelSerializer):
@@ -26,5 +26,5 @@ class CartSerializer(ModelSerializer):
 
     class Meta:
         model = Cart
-        fields = ['customer_phone', 'customer_wiches''order', 'order_item', 'total_cost']
+        fields = ['customer_phone', 'customer_wishes', 'order_item', 'total_cost']
         depth = 1

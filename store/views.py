@@ -38,7 +38,7 @@ class CartViewSet(
     viewsets.GenericViewSet
 ):
 
-    queryset = Cart.objects.all().select_related('order').order_by('-time_created')
+    queryset = Cart.objects.all().prefetch_related('order_item').order_by('-time_created')
     serializer_class = CartSerializer
     permission_classes = (AllowAny, )
 
@@ -51,7 +51,7 @@ class CartViewSet(
     def retrieve(self, request, *args, **kwargs):
         phone_number = kwargs['pk']
         try:
-            queryset = Cart.objects.get(order__consumer_phone=phone_number)
+            queryset = Cart.objects.get(customer_phone=phone_number)
             serializer = CartSerializer(queryset)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except ObjectDoesNotExist:
