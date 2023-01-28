@@ -11,7 +11,7 @@ def get_cart_url(pathname: str):
     return url
 
 
-class CategoryTest(APITestCase):
+class CartTest(APITestCase):
 
     def setUp(self) -> None:
         self.pathname = 'cart-detail'
