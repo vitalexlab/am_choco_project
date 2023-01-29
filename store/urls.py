@@ -1,13 +1,10 @@
-from django.urls import path
 from rest_framework import routers
 
-from store.views import CartViewSet
+from store.views import CartViewSet, OrderItemViewset
+    # AddOrDeleteOrderItemFromCart
 
 router = routers.DefaultRouter()
 router.register('cart', CartViewSet, basename='cart')
+router.register('order-item', OrderItemViewset, basename='order-item')
 
-urlpatterns = [
-    # path('cart/<str:phone>/', CartAPIView.as_view(), name='cart'),
-]
-
-urlpatterns += router.urls
+urlpatterns: list = [] + router.urls

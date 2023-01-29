@@ -1,28 +1,17 @@
-from rest_framework.serializers import ModelSerializer
+from rest_framework import serializers
 
 from store.models import Cart, OrderItem
 from products.models import Products
+from store.serializers.order_item import OrderItemForCartSerializer
 
 
-class OrderItemProductSerializer(ModelSerializer):
+class CartSerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = Products
-        fields = ['id', 'product_type', 'title', 'price']
+    """The serializer for a CRUD Cart operations"""
 
-
-class OrderItemSerializer(ModelSerializer):
-
-    product = OrderItemProductSerializer(many=False, read_only=True)
-
-    class Meta:
-        model = OrderItem
-        fields = ['id', 'quantity', 'sale', 'product']
-
-
-class CartSerializer(ModelSerializer):
-
-    order_item = OrderItemSerializer(read_only=True, many=True)
+    order_item = OrderItemForCartSerializer(
+        read_only=True, many=True
+    )
 
     def create(self, validated_data):
         request_data = self.context['request'].data
@@ -43,5 +32,8 @@ class CartSerializer(ModelSerializer):
 
     class Meta:
         model = Cart
-        fields = ['id', 'customer_phone', 'customer_wishes', 'order_item', 'total_cost']
+        fields = [
+            'id', 'customer_phone', 'customer_wishes', 'order_item',
+            'total_cost',
+        ]
         depth = 1

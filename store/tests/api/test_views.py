@@ -69,7 +69,7 @@ class CartTest(APITestCase):
     def create_cart_obj(self):
         test_cart = Cart.objects.create(
             customer_phone=self.cust_phone, customer_wishes=self.wishes,
-            cart_sale=0, is_completed=False, session_id=self.session_id
+            cart_sale=0, is_completed=False
         )
         return test_cart
 

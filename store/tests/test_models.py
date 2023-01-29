@@ -135,7 +135,6 @@ class CartTests(unittest.TestCase):
         )
         cart = Cart.objects.create(
             customer_phone='+375296217433', is_completed=self.status,
-            session_id=self.session_id
         )
         cart.order_item.add(order_item)
         self.assertEqual(cart.customer_phone, '+375296217433')
