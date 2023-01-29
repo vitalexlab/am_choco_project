@@ -65,10 +65,6 @@ class Cart(models.Model):
         verbose_name='Выполнен',
         default=False, null=False, blank=False
     )
-    session_id = models.CharField(
-        verbose_name='ID cессии', max_length=100,
-        null=False, blank=False
-    )
     time_created = models.DateTimeField(auto_now_add=True)
 
     @property

@@ -1,3 +1,5 @@
+import json
+
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
@@ -15,11 +17,14 @@ def get_cart_url(pathname: str):
 class CartTest(APITestCase):
 
     def setUp(self) -> None:
+        # Common variables
+        self.endpoint = 'http://127.0.0.1:8000/store/cart/'
         self.pathname = 'cart-detail'
+        # Cart variables
         self.cust_phone = '+375447192042'
         self.wishes = 'some wishes'
         self.cart_sale = 0
-        self.host = 'http://127.0.0.1:8000'
+        self.session_id = hash(timezone.now())
         # For a OrderItem instance creation
         self.prod_quantity5 = 5
         self.product_sale = 0
@@ -32,6 +37,10 @@ class CartTest(APITestCase):
         self.category_name = 'Category'
         # For a Product_type instance creation
         self.pt_name = 'Type'
+
+    def get_response(self, cart_id: str):
+        url = self.endpoint + cart_id + '/'
+        return self.client.get(url)
 
     def create_category(self):
         return Category.objects.create(name=self.category_name)
@@ -57,21 +66,31 @@ class CartTest(APITestCase):
         )
         return order_item
 
-    def create_cart_obj(self, session_id):
-        order_item = self.create_order_item()
+    def create_cart_obj(self):
         test_cart = Cart.objects.create(
             customer_phone=self.cust_phone, customer_wishes=self.wishes,
-            cart_sale=0, is_completed=False, session_id=session_id
+            cart_sale=0, is_completed=False, session_id=self.session_id
         )
-        test_cart.order_item.add(order_item)
         return test_cart
 
     def test_get_detail_cart(self):
         """Ensure that we can show a cart"""
-        cart = self.create_cart_obj(session_id=hash(timezone.now()))
-        url = self.host + '/store/cart/' + str(cart.id) + '/'
-        response = self.client.get(url)
+        cart = self.create_cart_obj()
+        response = self.get_response(str(cart.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(cart.cart_sale, 0)
         self.assertNotEqual(cart.is_completed, True)
         self.assertEqual(cart.customer_phone, self.cust_phone)
+
+    def test_create_detail_cart(self):
+        post_data = {
+            "order": {
+                "customer_phone": "+375296217431"
+            },
+            "order_item": [],
+        }
+        json_post_data = json.dumps(post_data)
+        response = self.client.post(
+            path=self.endpoint, data=json_post_data, content_type='application/json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)

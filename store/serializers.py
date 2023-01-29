@@ -29,7 +29,7 @@ class CartSerializer(ModelSerializer):
         order_items = request_data.get('order_item')
         cart = Cart.objects.create(
             customer_phone=validated_data.get('customer_phone'),
-            customer_wishes=validated_data.get('customer_wishes')
+            customer_wishes=validated_data.get('customer_wishes'),
         )
         for item in order_items:
             product_title: str = item.get('product').get('title')
@@ -43,5 +43,5 @@ class CartSerializer(ModelSerializer):
 
     class Meta:
         model = Cart
-        fields = ['customer_phone', 'customer_wishes', 'order_item', 'session_id', 'total_cost']
+        fields = ['id', 'customer_phone', 'customer_wishes', 'order_item', 'total_cost']
         depth = 1
