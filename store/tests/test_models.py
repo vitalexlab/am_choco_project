@@ -1,5 +1,7 @@
 import unittest
 
+from django.utils import timezone
+
 from products.models import Category, Products, ProductTypes
 from store.models import OrderItem, Cart
 
@@ -116,6 +118,7 @@ class CartTests(unittest.TestCase):
         self.prod_price = 100
         self.comp = 'some composition'
         self.pt_title = 'title2'
+        self.session_id = hash(timezone.now())
 
     def test_cart_creation_positive(self):
         category = get_category(
@@ -131,7 +134,8 @@ class CartTests(unittest.TestCase):
             item=product, count=self.count, sale=0,
         )
         cart = Cart.objects.create(
-            customer_phone='+375296217433', is_completed=self.status
+            customer_phone='+375296217433', is_completed=self.status,
+            session_id=self.session_id
         )
         cart.order_item.add(order_item)
         self.assertEqual(cart.customer_phone, '+375296217433')

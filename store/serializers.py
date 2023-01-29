@@ -43,5 +43,5 @@ class CartSerializer(ModelSerializer):
 
     class Meta:
         model = Cart
-        fields = ['customer_phone', 'customer_wishes', 'order_item', 'total_cost']
+        fields = ['customer_phone', 'customer_wishes', 'order_item', 'session_id', 'total_cost']
         depth = 1

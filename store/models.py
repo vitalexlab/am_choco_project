@@ -57,9 +57,17 @@ class Cart(models.Model):
             MaxValueValidator(100), MinValueValidator(0)
         ]
     )
+    is_confirmed = models.BooleanField(
+        verbose_name='Подтвержден',
+        default=False, null=False, blank=False
+    )
     is_completed = models.BooleanField(
         verbose_name='Выполнен',
         default=False, null=False, blank=False
+    )
+    session_id = models.CharField(
+        verbose_name='ID cессии', max_length=100,
+        null=False, blank=False
     )
     time_created = models.DateTimeField(auto_now_add=True)
 
@@ -73,7 +81,7 @@ class Cart(models.Model):
     total_cost.fget.short_description = 'Сумма корзины, коп.'
 
     def __str__(self):
-        return f'{self.order}/ на сумму ({self.total_cost // 100} руб. {int(self.total_cost % 100)} коп.)'
+        return f'{self.customer_phone}/ на сумму ({self.total_cost // 100} руб. {int(self.total_cost % 100)} коп.)'
 
     def clean(self):
         phone = ValidatePhone(str(self.customer_phone))
