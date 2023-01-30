@@ -14,6 +14,8 @@ from store.serializers.order_item_cart_rel import OrderItemCartRelSerializer
 
 
 def get_valid_cart_id_or_400(request) -> [int, Response]:
+    """Returns either cart_id or 400 BAD REQUEST"""
+
     cart_id = request.session.get('cart_id', False)
     if not isinstance(cart_id, int):
         return Response(
@@ -26,6 +28,8 @@ def get_valid_cart_id_or_400(request) -> [int, Response]:
 
 
 def get_valid_order_item_pk_or_400(kwargs: dict) -> [int, Response]:
+    """Returns either order_item_pk or 400 BAD REQUEST"""
+
     try:
         order_item_pk = int(kwargs.get('pk'))
     except ValueError:
@@ -34,7 +38,6 @@ def get_valid_order_item_pk_or_400(kwargs: dict) -> [int, Response]:
             status=status.HTTP_400_BAD_REQUEST
         )
     return order_item_pk
-
 
 
 class CartViewSet(
@@ -62,7 +65,7 @@ class CartViewSet(
 
         This POST method creates a cart without any OrderItem instances.
         To add any OrderItem instances to the cart use POST method for
-         an endpoint <b>/store/add-order-item/</b>. More info in a
+         an endpoint <b>/store/add-to-cart/</b>. More info in a
          particular method description
         """
         if request.session.get('cart_id', False):
@@ -208,6 +211,23 @@ class OrderItemCartRelViewset(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet
 ):
+    """Viewset to add or to remove OrderItem instances to a cart
+
+    <b>Make sure the cart is created before using this endpoint</b>
+    There are 2 working methods:
+
+    PUT method:
+    To add an OrderItem instance to a cart use endpoint
+    /store/add-to-cart/{id} - where id is a OrderItem instance
+    id to add.
+
+    DELETE method:
+    To remove an OrderItem instance from a cart use endpoint
+    /store/add-to-cart/{id} - where id is a OrderItem instance
+    id to add.
+    """
+
+
     rel_manager = OrderItemCartRelations.objects
     pref_order_item = rel_manager.prefetch_related('order_item')
     pref_order_item_sel_cart = pref_order_item.select_related('cart')
@@ -217,6 +237,14 @@ class OrderItemCartRelViewset(
     permission_classes = (AllowAny, )
 
     def update(self, request, *args, **kwargs):
+
+        """Method defines an interaction schema
+
+        To update relations between an OrderItem instance and a
+        Cart instance pass the OrderItem instance id in the endpoint
+        /store/add-to-cart/{id}
+        """
+
         cart_id = get_valid_cart_id_or_400(request)
         order_item_pk = get_valid_order_item_pk_or_400(kwargs)
         data = {
@@ -234,6 +262,14 @@ class OrderItemCartRelViewset(
         return Response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):
+
+        """Method defines a removing object schema
+
+        To delete relations between an OrderItem instance and a
+        Cart instance pass the OrderItem instance id in the endpoint
+        /store/add-to-cart/{id}
+        """
+
         cart_id = get_valid_cart_id_or_400(request)
         order_item_pk = get_valid_order_item_pk_or_400(kwargs)
         try:
