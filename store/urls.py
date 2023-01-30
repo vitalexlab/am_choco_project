@@ -1,6 +1,8 @@
 from rest_framework import routers
 
-from store.views import CartViewSet, OrderItemViewSet, OrderItemCartRelViewset
+from store.viewsets.cart import CartViewSet
+from store.viewsets.order_item import OrderItemViewSet
+from store.viewsets.orderitem_cart import OrderItemCartRelViewset
 
 router = routers.DefaultRouter()
 router.register('cart', CartViewSet, basename='cart')
