@@ -50,7 +50,8 @@ class Cart(models.Model):
         verbose_name='Пожелания покупателя', null=True, blank=True
     )
     order_item = models.ManyToManyField(
-        OrderItem, related_name='orderitem',verbose_name='Заказ товара'
+        OrderItem, related_name='orderitem',verbose_name='Заказ товара',
+        through='OrderItemCartRelations'
     )
     cart_sale = models.PositiveIntegerField(
         default=0, verbose_name='Скидка на корзину, %', validators=[
@@ -87,3 +88,26 @@ class Cart(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         return super(Cart, self).save(*args,**kwargs)
+
+
+class OrderItemCartRelations(models.Model):
+
+    class Meta:
+        verbose_name = 'Добавление/ удаление товаров из корзины'
+        verbose_name_plural = verbose_name
+        unique_together = ('order_item', 'cart')
+
+    order_item = models.ForeignKey(
+        OrderItem, on_delete=models.CASCADE,
+        verbose_name='Заказываемые товары'
+    )
+    cart = models.ForeignKey(
+        Cart, on_delete=models.CASCADE, verbose_name='Корзина',
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True, blank=False
+    )
+    updated_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.order_item} * {self.cart}'

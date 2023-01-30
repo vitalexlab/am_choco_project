@@ -6,14 +6,41 @@ from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 
-from store.models import Cart, OrderItem
+from products.models import Products
+from store.models import Cart, OrderItem, OrderItemCartRelations
 from store.serializers.cart import CartSerializer
 from store.serializers.order_item import OrderItemCRUDSerializer
+from store.serializers.order_item_cart_rel import OrderItemCartRelSerializer
+
+
+def get_valid_cart_id_or_400(request) -> [int, Response]:
+    cart_id = request.session.get('cart_id', False)
+    if not isinstance(cart_id, int):
+        return Response(
+            {
+                'error': 'An incorrect cart_id type: must be int'
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    return cart_id
+
+
+def get_valid_order_item_pk_or_400(kwargs: dict) -> [int, Response]:
+    try:
+        order_item_pk = int(kwargs.get('pk'))
+    except ValueError:
+        return Response(
+            {'error': 'order_item_pk must be an integer'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    return order_item_pk
+
 
 
 class CartViewSet(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet
 ):
@@ -87,7 +114,7 @@ class CartViewSet(
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class OrderItemViewset(
+class OrderItemViewSet(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
@@ -141,7 +168,13 @@ class OrderItemViewset(
             'quantity': quantity
         })
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        try:
+            serializer.save()
+        except Products.DoesNotExist:
+            return Response(
+                {'error': 'Products object doesn\'t exist'},
+                status=status.HTTP_404_NOT_FOUND
+            )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
@@ -168,3 +201,45 @@ class OrderItemViewset(
         return Response(
             serializer.data, status=status.HTTP_202_ACCEPTED
         )
+
+
+class OrderItemCartRelViewset(
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet
+):
+    rel_manager = OrderItemCartRelations.objects
+    pref_order_item = rel_manager.prefetch_related('order_item')
+    pref_order_item_sel_cart = pref_order_item.select_related('cart')
+
+    queryset = pref_order_item_sel_cart.all()
+    serializer_class = OrderItemCartRelSerializer
+    permission_classes = (AllowAny, )
+
+    def update(self, request, *args, **kwargs):
+        cart_id = get_valid_cart_id_or_400(request)
+        order_item_pk = get_valid_order_item_pk_or_400(kwargs)
+        data = {
+                'cart_id': cart_id,
+                'order_item_id': order_item_pk
+            }
+        rel_object, status_ = OrderItemCartRelations.objects.get_or_create(
+            order_item_id=order_item_pk, cart_id=cart_id
+        )
+        serializer = self.serializer_class(
+            instance=rel_object, data=data, partial=False
+        )
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        cart_id = get_valid_cart_id_or_400(request)
+        order_item_pk = get_valid_order_item_pk_or_400(kwargs)
+        try:
+            OrderItemCartRelations.objects.get(
+                order_item_id=order_item_pk, cart_id=cart_id
+            ).delete()
+        except OrderItemCartRelations.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_200_OK)
