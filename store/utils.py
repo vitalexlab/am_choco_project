@@ -49,9 +49,3 @@ class ValidatePhone:
                 return self._validate_phone_ru(phone_operator)
             elif state.get('ua'):
                 return self._validate_phone_ua(phone_operator)
-
-
-if __name__ == '__main__':
-     number = '+375296217433'
-     val = ValidatePhone(number)
-     print(val.validate())

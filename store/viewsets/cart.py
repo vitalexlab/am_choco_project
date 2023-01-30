@@ -43,7 +43,7 @@ class CartViewSet(
                 {'customer_phone': order_data.get('customer_phone')}
             )
             data_to_serialize.update(
-                {'customer_wishes': order_data.get('wishes')}
+                {'customer_wishes': order_data.get('customer_wishes')}
             )
         serializer = self.get_serializer(data=data_to_serialize)
         serializer.is_valid(raise_exception=True)

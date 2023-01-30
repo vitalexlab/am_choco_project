@@ -2,36 +2,11 @@ import unittest
 
 from django.utils import timezone
 
-from products.models import Category, Products, ProductTypes
+from products.models import Products, ProductTypes
 from store.models import OrderItem, Cart
-
-
-def get_product(
-        title: str, category: Category, description: str, price: int,
-        comp: str, product_type: ProductTypes
-):
-    product_obj = Products.objects.create(
-        title=title, category=category, description=description,
-        price=price, composition=comp
-    )
-    product_obj.product_type.add(product_type)
-    return product_obj
-
-
-def get_category(name: str):
-    return Category.objects.create(name=name)
-
-
-def get_order_item(
-        item: Products, count: int, sale: int
-):
-    return OrderItem.objects.create(
-        product=item, quantity=count, sale=sale
-    )
-
-
-def get_product_type(title: str):
-    return ProductTypes.objects.create(title=title)
+from store.tests.utils import (
+    get_product, get_category, get_orderitem, get_product_type, get_cart
+)
 
 
 class OrderItemTests(unittest.TestCase):
@@ -50,34 +25,33 @@ class OrderItemTests(unittest.TestCase):
     def test_order_item_creation(self):
         self.category1 = get_category(name=self.category_name)
         self.assertEqual(self.category1.name, 'Category212333')
-        self.product_type1 = ProductTypes.objects.create(
+        self.product_type1 = get_product_type(
             title=self.product_type_title
         )
         self.assertEqual(self.product_type1.title, 'Pt212312321')
         self.product1 = get_product(
             title=self.product_name, category=self.category1,
-            description=self.desc, price=500, comp=self.composition1,
+            description=self.desc, price=500, composition=self.composition1,
             product_type=self.product_type1
         )
         self.assertEqual(self.product1.title, 'Product2')
-        self.order_item1 = get_order_item(
-            item=self.product1, count=self.product_count5, sale=0
+        self.order_item1 = get_orderitem(
+            product=self.product1, quantity=self.product_count5, sale=0
         )
         self.assertEqual(self.order_item1.product, self.product1)
         self.assertEqual(self.order_item1.quantity, 5)
 
     def test_orderitem_quantity(self):
         product1 = Products.objects.get(title=self.product_name)
-        self.order_item1 = get_order_item(
-            item=product1, count=self.product_count5, sale=0
+        self.order_item1 = get_orderitem(
+            product=product1, quantity=self.product_count5, sale=0
         )
         self.assertEqual(self.order_item1.quantity, self.product_count5)
-        self.order_item2 = get_order_item(
-            item=product1, count=self.product_count10, sale=0
+        self.order_item2 = get_orderitem(
+            product=product1, quantity=self.product_count10, sale=0
         )
         self.assertEqual(self.order_item1.quantity, self.product_count5)
         self.assertEqual(self.order_item2.quantity, self.product_count10)
-
 
     def test_orderitem_sale(self):
         order_item = OrderItem.objects.first()
@@ -128,22 +102,24 @@ class CartTests(unittest.TestCase):
         product = get_product(
             title=self.category_title, category=category,
             description=self.desc, price=self.prod_price,
-            comp=self.comp, product_type=product_type
+            composition=self.comp, product_type=product_type
         )
-        order_item = get_order_item(
-            item=product, count=self.count, sale=0,
+        order_item = get_orderitem(
+            product=product, quantity=self.count, sale=0,
         )
-        cart = Cart.objects.create(
-            customer_phone='+375296217433', is_completed=self.status,
+        cart = get_cart(
+            customer_phone='+375296217433', customer_wishes='',
+            cart_sale=0
         )
         cart.order_item.add(order_item)
         self.assertEqual(cart.customer_phone, '+375296217433')
 
     def test_cart_is_completed(self):
         cart = Cart.objects.get(customer_phone='+375296217433')
+        cart.is_completed = True
         self.assertEqual(cart.is_completed, True)
 
-    def test_cart_totalcost(self):
+    def test_cart_total_cost(self):
         cart = Cart.objects.get(customer_phone='+375296217433')
         item_cost = 0
         for item in cart.order_item.all():
