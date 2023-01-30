@@ -55,7 +55,7 @@ class Products(models.Model):
         blank=False, null=False
     )
     category = models.ForeignKey(
-        Category, on_delete=models.PROTECT
+        Category, on_delete=models.PROTECT, verbose_name='Категория'
     )
     product_type = models.ManyToManyField(
         ProductTypes, related_name='product_type',
