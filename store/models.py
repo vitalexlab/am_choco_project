@@ -66,7 +66,10 @@ class Cart(models.Model):
         verbose_name='Выполнен',
         default=False, null=False, blank=False
     )
-    time_created = models.DateTimeField(auto_now_add=True)
+    time_created = models.DateTimeField(
+        auto_now_add=True, verbose_name='Дата создания заказа'
+    )
+
 
     @property
     def total_cost(self):

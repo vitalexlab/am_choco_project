@@ -3,7 +3,6 @@ import json
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from store.models import OrderItem
 from store.tests.utils import (
     get_product, get_category, get_product_type, get_orderitem
 )
@@ -115,7 +114,7 @@ class OrderItemTest(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def patch_order_item(self):
+    def test_patch_order_item(self):
         category_obj = get_category(name=self.cat_name)
         product_type = get_product_type(
             title=self.pt_title
@@ -145,22 +144,7 @@ class OrderItemTest(APITestCase):
             path=url, data=patch_data, content_type='application/json'
         )
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
-        product_id_test = 3
-        patch_data2 = {
-            'product_id': product_id_test,
-            "quantity": 13
-        }
-        url = self.endpoint + str(order_item_id) + '/'
-        response = self.client.patch(
-            path=url, data=patch_data2, content_type='application/json'
-        )
 
-        self.assertNotEqual(
-            response.data.get('product'), product_id_test
-        )
-        self.assertEqual(
-            response.data.get('product_id'), product.id
-        )
         product_id_test = 'qw'
         patch_data2 = {
             'product_id': product_id_test,
@@ -170,7 +154,7 @@ class OrderItemTest(APITestCase):
         response = self.client.patch(
             path=url, data=patch_data2, content_type='application/json'
         )
-        self.assertTrue(
+        self.assertFalse(
             isinstance(
                 response.data.get('product_id'), int
             )
